@@ -32,63 +32,63 @@
 </template>
 
 <script>
-import { login } from "@/api/api.js";
+import { login } from '@/api/api.js'
 export default {
-  data() {
+  data () {
     return {
       ruleForm: {
-        username: "",
-        password: ""
+        username: '',
+        password: ''
       },
       rules: {
         username: [
-          { required: true, message: "请输入用户名", trigger: "blur" }
+          { required: true, message: '请输入用户名', trigger: 'blur' }
         ],
         password: [
-          { required: true, message: "请输入密码", trigger: "blur" }
+          { required: true, message: '请输入密码', trigger: 'blur' }
           // { min: 6, max: 16, message: "长度在 6 到 16 个字符", trigger: "blur" }
         ]
       }
-    };
+    }
   },
   methods: {
-    loginTo() {
+    loginTo () {
       this.$refs.ruleForm.validate(valid => {
         if (valid) {
           login(this.ruleForm)
             .then(res => {
               if (res.data.meta.status === 200) {
                 // 存储token
-                localStorage.setItem('userLogin',res.data.data.token);
+                localStorage.setItem('userLogin', res.data.data.token)
                 // 跳转
-                this.$router.push({name:'Home'})
-              }else{
+                this.$router.push({ name: 'Home' })
+              } else {
                 // 登录失败提示
                 this.$notify.error({
-                  duration: "2000",
-                  position: "top-left",
+                  duration: '2000',
+                  position: 'top-left',
                   message: res.data.meta.msg,
                   showClose: false
-                });
+                })
               }
             })
             .catch(err => {
-              console.log(err);
-            });
+              console.log(err)
+            })
         } else {
           // 输入出错提示
           this.$notify.error({
-            duration: "2000",
-            position: "top-left",
-            message: "数据输入错误，请重新输入",
+            duration: '2000',
+            position: 'top-left',
+            message: '数据输入错误，请重新输入',
             showClose: false
-          });
-          return false;
+          })
+          return false
         }
-      });
+      })
     }
   }
-};
+}
 </script>
 
 <style lang="less" scoped>
@@ -124,4 +124,3 @@ export default {
   }
 }
 </style>
-

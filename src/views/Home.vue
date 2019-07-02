@@ -21,7 +21,7 @@
                   <i class="el-icon-location"></i>
                   <span>用户管理</span>
                 </template>
-                <el-menu-item index="1-1">
+                <el-menu-item index="/home/userList">
                   <template slot="title">
                     <i class="el-icon-location"></i>
                     <span>用户列表</span>
@@ -52,9 +52,15 @@
         </el-row>
       </el-aside>
       <el-container>
-        <el-header>Header</el-header>
+        <el-header>
+          <span class="toggle-btn">
+            <i class="myicon myicon-menu"></i>
+          </span>
+          <p class="system-title">后台管理系统</p>
+          <a class="welcome" href="javasrcipt:;" @click="exit">退出</a>
+        </el-header>
         <el-main>
-            <router-view></router-view>
+          <router-view></router-view>
         </el-main>
       </el-container>
     </el-container>
@@ -62,7 +68,21 @@
 </template>
 
 <script>
-export default {};
+export default {
+  methods: {
+    // 退出方法
+    exit () {
+      this.$confirm('客官真的要走吗？要不再看看', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        localStorage.removeItem('userLogin')
+        this.$router.push('/login')
+      })
+    }
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -107,7 +127,9 @@ export default {};
   }
   .welcome {
     color: white;
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 </style>
-
