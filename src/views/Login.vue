@@ -14,11 +14,17 @@
         </el-form-item>
         <!-- 密码 -->
         <el-form-item prop="password">
-          <el-input prefix-icon="myicon myicon-key" v-model="ruleForm.password" placeholder="请输入密码"></el-input>
+          <el-input
+            @keyup.enter.native="loginTo"
+            prefix-icon="myicon myicon-key"
+            v-model="ruleForm.password"
+            placeholder="请输入密码"
+            type="password"
+          ></el-input>
         </el-form-item>
         <!-- 按钮 -->
         <el-form-item>
-          <el-button class="login-btn" type="primary" >登录</el-button>
+          <el-button @click.native="loginTo" class="login-btn" type="primary">登录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -26,6 +32,7 @@
 </template>
 
 <script>
+import { login } from "@/api/api.js";
 export default {
   data() {
     return {
@@ -38,11 +45,48 @@ export default {
           { required: true, message: "请输入用户名", trigger: "blur" }
         ],
         password: [
-          { required: true, message: "请输入密码", trigger: "blur" },
-          { min: 6, max: 16, message: "长度在 6 到 16 个字符", trigger: "blur" }
+          { required: true, message: "请输入密码", trigger: "blur" }
+          // { min: 6, max: 16, message: "长度在 6 到 16 个字符", trigger: "blur" }
         ]
       }
     };
+  },
+  methods: {
+    loginTo() {
+      this.$refs.ruleForm.validate(valid => {
+        if (valid) {
+          login(this.ruleForm)
+            .then(res => {
+              if (res.data.meta.status === 200) {
+                // 存储token
+                localStorage.setItem('userLogin',res.data.data.token);
+                // 跳转
+                this.$router.push({name:'Home'})
+              }else{
+                // 登录失败提示
+                this.$notify.error({
+                  duration: "2000",
+                  position: "top-left",
+                  message: res.data.meta.msg,
+                  showClose: false
+                });
+              }
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        } else {
+          // 输入出错提示
+          this.$notify.error({
+            duration: "2000",
+            position: "top-left",
+            message: "数据输入错误，请重新输入",
+            showClose: false
+          });
+          return false;
+        }
+      });
+    }
   }
 };
 </script>
