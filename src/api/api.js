@@ -29,3 +29,12 @@ export const userList = (params) => {
     params
   })
 }
+
+// 添加用户
+export const addNewUser = (data) => {
+  return axios({
+    method: 'post',
+    url: 'users',
+    data
+  })
+}
