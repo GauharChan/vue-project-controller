@@ -168,8 +168,8 @@ export default {
             .then(res => {
               if (res.data.meta.status === 200) {
                 this.$message.success(res.data.meta.msg)
-                // 删除后，重新计算总页数再请求，避免出现页面没数据的情况
-                this.params.pagenum = Math.ceil((total - 1) / this.params.pagesize)
+                // 删除后，重新计算页数再请求，避免出现页面没数据的情况, 删除后得到的页码小于没删除前的页码的话，代表当前页面没有数据
+                this.params.pagenum = Math.ceil((total - 1) / this.params.pagesize) < this.params.pagenum ? --this.params.pagenum : this.params.pagenum
                 this.init()
               } else {
                 this.$message.error(res.data.meta.msg)
