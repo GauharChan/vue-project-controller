@@ -28,19 +28,25 @@
       <!-- 自定义列模板 -->
       <el-table-column label="用户状态" width="100">
         <template slot-scope="scope">
-          <el-switch v-model="switchValue" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+          <!-- 通过scope.row获取对应的一行的表格数据 -->
+          <el-switch
+            @change="changeStatus(scope.row.id,scope.row.mg_state)"
+            v-model="scope.row.mg_state"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+          ></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-tooltip class="item" effect="dark" content="编辑" placement="top">
-            <el-button type="primary" icon="el-icon-edit"></el-button>
+            <el-button type="primary" plain icon="el-icon-edit"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="分配角色" placement="top">
-            <el-button type="primary" icon="el-icon-share"></el-button>
+            <el-button type="info" plain icon="el-icon-share"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
-            <el-button type="primary" icon="el-icon-delete"></el-button>
+            <el-button type="danger" plain icon="el-icon-delete"></el-button>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -66,7 +72,12 @@
           <el-input v-model="userForm.username" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="密码" :label-width="'80px'" prop="password">
-          <el-input v-model="userForm.password" autocomplete="off" @keyup.enter.native="addNew"></el-input>
+          <el-input
+            type="password"
+            v-model="userForm.password"
+            autocomplete="off"
+            @keyup.enter.native="addNew"
+          ></el-input>
         </el-form-item>
         <el-form-item label="邮箱" :label-width="'80px'" prop="email">
           <el-input v-model="userForm.email" autocomplete="off"></el-input>
@@ -84,7 +95,7 @@
 </template>
 
 <script>
-import { userList, addNewUser } from '@/api/api.js'
+import { userList, addNewUser, changeState } from '@/api/user_api.js'
 export default {
   data () {
     return {
@@ -96,7 +107,7 @@ export default {
       params: {
         query: '',
         pagenum: 1,
-        pagesize: 1
+        pagesize: 4
       },
       // 数据总条数
       sum: 0,
@@ -120,6 +131,7 @@ export default {
             required: true,
             message: '请输入邮箱',
             trigger: 'blur',
+            // eslint-disable-next-line no-useless-escape
             pattern: /\w+[@]\w+[\.]\w{2,3}/
           }
         ],
@@ -139,6 +151,20 @@ export default {
     this.init()
   },
   methods: {
+    // 修改用户状态
+    changeStatus (uId, type) {
+      changeState(uId, type)
+        .then(res => {
+          if (res.data.meta.status === 200) {
+            this.$message.success(res.data.meta.msg)
+          } else{
+            this.$message.error(res.data.meta.msg)
+          }
+        })
+        .catch(err1 => {
+          this.$message.error(err1)
+        })
+    },
     // 添加用户
     addNew () {
       this.$refs.userForm.validate(vali => {
@@ -181,6 +207,7 @@ export default {
     init () {
       userList(this.params)
         .then(res => {
+          console.log(res)
           if (res.data.meta.status === 200) {
             this.sum = res.data.data.total
             this.userList = res.data.data.users

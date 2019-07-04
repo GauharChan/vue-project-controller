@@ -1,3 +1,6 @@
+
+// 封装axios的配置
+
 import axios from 'axios'
 
 axios.defaults.baseURL = 'http://localhost:8888/api/private/v1/'
@@ -13,28 +16,4 @@ axios.interceptors.request.use(function (config) {
   return Promise.reject(error)
 })
 
-// 登录接口请求
-export const login = (data) => {
-  return axios({
-    method: 'post',
-    data,
-    url: 'login'
-  })
-}
-
-// 获取用户列表数据
-export const userList = (params) => {
-  return axios({
-    url: 'users',
-    params
-  })
-}
-
-// 添加用户
-export const addNewUser = (data) => {
-  return axios({
-    method: 'post',
-    url: 'users',
-    data
-  })
-}
+export default axios
