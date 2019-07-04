@@ -43,10 +43,20 @@
             <el-button type="primary" plain icon="el-icon-edit"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="分配角色" placement="top">
-            <el-button type="info" plain icon="el-icon-share"></el-button>
+            <el-button
+              @click="allotrole(scope.row)"
+              type="info"
+              plain
+              icon="el-icon-share"
+            ></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
-            <el-button @click="deleteuser(scope.row.id,sum)" type="danger" plain icon="el-icon-delete"></el-button>
+            <el-button
+              @click="deleteuser(scope.row.id,sum)"
+              type="danger"
+              plain
+              icon="el-icon-delete"
+            ></el-button>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -65,7 +75,7 @@
         :total="sum"
       ></el-pagination>
     </div>
-    <!-- dialog对话框 -->
+    <!-- 添加用户dialog对话框 -->
     <el-dialog title="添加用户" :visible.sync="dialogFormVisible">
       <el-form :model="userForm" :rules="rules" ref="userForm">
         <el-form-item label="用户名" :label-width="'80px'" prop="username">
@@ -91,6 +101,29 @@
         <el-button type="primary" @click="addNew">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 分配角色dialog对话框 -->
+    <el-dialog title="分配角色" :visible.sync="roleDialogFormVisible">
+      <el-form :model="roleForm">
+        <el-form-item label="用户名" :label-width="'120px'">
+          <el-input v-model="roleForm.username" autocomplete="off" disabled="" style="width:220px"></el-input>
+        </el-form-item>
+        <el-form-item label="角色" :label-width="'120px'">
+          <el-select v-model="roleForm.rid" placeholder="请选择角色">
+            <!-- v-for循环生成选项 -->
+            <el-option
+              v-for="item in rolelist"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="roleDialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="roleDialogFormVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -99,11 +132,22 @@ import {
   userList,
   addNewUser,
   changeState,
-  delteUserById
+  delteUserById,
+  allotRole
 } from '@/api/user_api.js'
+import { roleList } from '@/api/role_api.js'
 export default {
   data () {
     return {
+      // 角色列表
+      rolelist: null,
+      // 分配角色dialog
+      roleForm: {
+        username: '',
+        rid: ''
+
+      },
+      roleDialogFormVisible: false,
       // switch开关状态
       switchValue: true,
       // 用户列表数据
@@ -154,8 +198,26 @@ export default {
   mounted () {
     // 加载页面的时候请求一次
     this.init()
+    roleList()
+      .then(res => {
+        if (res.data.meta.status === 200) {
+          this.rolelist = res.data.data
+        } else {
+          this.$message.error(res.data.meta.msg)
+        }
+      })
+      .catch(err1 => {
+        console.log(err1)
+      })
   },
   methods: {
+    // 分配角色
+    allotrole (row) {
+      this.roleDialogFormVisible = true
+      // 获取当前行的数据
+      this.roleForm.rid = row.rid
+      this.roleForm.username = row.username
+    },
     // 删除用户
     deleteuser (id, total) {
       this.$confirm('该操作将会永久删除该用户，请三思', '删除提示', {
@@ -169,7 +231,11 @@ export default {
               if (res.data.meta.status === 200) {
                 this.$message.success(res.data.meta.msg)
                 // 删除后，重新计算页数再请求，避免出现页面没数据的情况, 删除后得到的页码小于没删除前的页码的话，代表当前页面没有数据
-                this.params.pagenum = Math.ceil((total - 1) / this.params.pagesize) < this.params.pagenum ? --this.params.pagenum : this.params.pagenum
+                this.params.pagenum =
+                  Math.ceil((total - 1) / this.params.pagesize) <
+                  this.params.pagenum
+                    ? --this.params.pagenum
+                    : this.params.pagenum
                 this.init()
               } else {
                 this.$message.error(res.data.meta.msg)
@@ -235,7 +301,6 @@ export default {
     },
     // 封装请求用户信息方法
     init () {
-      console.log(this.params)
       userList(this.params)
         .then(res => {
           console.log(res)

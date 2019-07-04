@@ -42,3 +42,14 @@ export const delteUserById = (id) => {
     url: `users/${id}`
   })
 }
+
+// 分配角色
+export const allotRole = (id, rid) => {
+  return axios({
+    url: `users/${id}/role`,
+    method: 'put',
+    data: {
+      rid
+    }
+  })
+}
