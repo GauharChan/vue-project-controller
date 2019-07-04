@@ -34,3 +34,11 @@ export const changeState = (uId, type) => {
     url: `users/${uId}/state/${type}`
   })
 }
+
+// 删除用户
+export const delteUserById = (id) => {
+  return axios({
+    method: 'delete',
+    url: `users/${id}`
+  })
+}

@@ -46,7 +46,7 @@
             <el-button type="info" plain icon="el-icon-share"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
-            <el-button type="danger" plain icon="el-icon-delete"></el-button>
+            <el-button @click="deleteuser(scope.row.id,sum)" type="danger" plain icon="el-icon-delete"></el-button>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -95,7 +95,12 @@
 </template>
 
 <script>
-import { userList, addNewUser, changeState } from '@/api/user_api.js'
+import {
+  userList,
+  addNewUser,
+  changeState,
+  delteUserById
+} from '@/api/user_api.js'
 export default {
   data () {
     return {
@@ -151,13 +156,38 @@ export default {
     this.init()
   },
   methods: {
+    // 删除用户
+    deleteuser (id, total) {
+      this.$confirm('该操作将会永久删除该用户，请三思', '删除提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          delteUserById(id, total)
+            .then(res => {
+              if (res.data.meta.status === 200) {
+                this.$message.success(res.data.meta.msg)
+                // 删除后，重新计算总页数再请求，避免出现页面没数据的情况
+                this.params.pagenum = Math.ceil((total - 1) / this.params.pagesize)
+                this.init()
+              } else {
+                this.$message.error(res.data.meta.msg)
+              }
+            })
+            .catch(err1 => {
+              this.$message.error(err1)
+            })
+        })
+        .catch(() => {})
+    },
     // 修改用户状态
     changeStatus (uId, type) {
       changeState(uId, type)
         .then(res => {
           if (res.data.meta.status === 200) {
             this.$message.success(res.data.meta.msg)
-          } else{
+          } else {
             this.$message.error(res.data.meta.msg)
           }
         })
@@ -205,6 +235,7 @@ export default {
     },
     // 封装请求用户信息方法
     init () {
+      console.log(this.params)
       userList(this.params)
         .then(res => {
           console.log(res)
