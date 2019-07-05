@@ -53,3 +53,15 @@ export const allotRole = (id, rid) => {
     }
   })
 }
+
+// 编辑用户
+export const editUser = (id, email, mobile) => {
+  return axios({
+    url: `users/${id}`,
+    method: 'put',
+    data: {
+      email,
+      mobile
+    }
+  })
+}

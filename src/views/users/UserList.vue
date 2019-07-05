@@ -40,15 +40,10 @@
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-tooltip class="item" effect="dark" content="编辑" placement="top">
-            <el-button type="primary" plain icon="el-icon-edit"></el-button>
+            <el-button @click="getRowData(scope.row)" type="primary" plain icon="el-icon-edit"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="分配角色" placement="top">
-            <el-button
-              @click="allotrole(scope.row)"
-              type="info"
-              plain
-              icon="el-icon-share"
-            ></el-button>
+            <el-button @click="allotrole(scope.row)" type="info" plain icon="el-icon-share"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
             <el-button
@@ -105,7 +100,7 @@
     <el-dialog title="分配角色" :visible.sync="roleDialogFormVisible">
       <el-form :model="roleForm">
         <el-form-item label="用户名" :label-width="'120px'">
-          <el-input v-model="roleForm.username" autocomplete="off" disabled="" style="width:220px"></el-input>
+          <el-input v-model="roleForm.username" autocomplete="off" disabled style="width:220px"></el-input>
         </el-form-item>
         <el-form-item label="角色" :label-width="'120px'">
           <el-select v-model="roleForm.rid" placeholder="请选择角色">
@@ -124,6 +119,24 @@
         <el-button type="primary" @click="sureAllotRole">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 编辑用户dialog对话框 -->
+    <el-dialog title="编辑用户" :visible.sync="editDialogFormVisible">
+      <el-form :model="editForm" :rules="rules" ref="editForm">
+        <el-form-item label="用户名" :label-width="'120px'">
+          <el-input v-model="editForm.username" autocomplete="off" disabled style="width:220px"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" :label-width="'120px'" prop="email">
+          <el-input v-model="editForm.email" autocomplete="off" style="width:220px"></el-input>
+        </el-form-item>
+        <el-form-item label="电话" :label-width="'120px'" prop="mobile">
+          <el-input v-model="editForm.mobile" autocomplete="off" style="width:220px"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="editDialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="putEdit">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -133,12 +146,21 @@ import {
   addNewUser,
   changeState,
   delteUserById,
-  allotRole
+  allotRole,
+  editUser
 } from '@/api/user_api.js'
 import { roleList } from '@/api/role_api.js'
 export default {
   data () {
     return {
+      editForm: {
+        username: '',
+        email: '',
+        mobile: '',
+        id: ''
+      },
+      // 编辑对话框的显示隐藏
+      editDialogFormVisible: false,
       // 角色列表
       rolelist: null,
       // 分配角色dialog
@@ -178,7 +200,7 @@ export default {
         email: [
           {
             required: true,
-            message: '请输入邮箱',
+            message: '请输入正确的邮箱',
             trigger: 'blur',
             // eslint-disable-next-line no-useless-escape
             pattern: /\w+[@]\w+[\.]\w{2,3}/
@@ -211,10 +233,39 @@ export default {
       })
   },
   methods: {
+    // 提交编辑修改
+    putEdit () {
+      editUser(this.editForm.id, this.editForm.email, this.editForm.mobile)
+        .then(res => {
+          this.$refs.editForm.validate((vali) => {
+            if (vali) {
+              if (res.data.meta.status === 200) {
+                this.$message.success(res.data.meta.msg)
+                this.init()
+                this.editDialogFormVisible = false
+              } else {
+                this.$message.error(res.data.meta.msg)
+              }
+            } else {
+            }
+          })
+        })
+        .catch(err3 => {
+          this.$message.error(err3)
+        })
+    },
+    // 编辑获取操作当前行数据
+    getRowData (row) {
+      this.editDialogFormVisible = true
+      this.editForm.username = row.username
+      this.editForm.email = row.email
+      this.editForm.mobile = row.mobile
+      this.editForm.id = row.id
+    },
     // 分配角色
     sureAllotRole () {
       allotRole(this.roleForm.id, this.roleForm.rid)
-        .then((res) => {
+        .then(res => {
           if (res.data.meta.status === 200) {
             this.$message.success(res.data.meta.msg)
             this.init()
@@ -223,7 +274,7 @@ export default {
             this.$message.error(res.data.meta.msg)
           }
         })
-        .catch((err2) => {
+        .catch(err2 => {
           this.$message.error(err2)
         })
     },
