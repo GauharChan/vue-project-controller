@@ -121,7 +121,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="roleDialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="roleDialogFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="sureAllotRole">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -145,7 +145,7 @@ export default {
       roleForm: {
         username: '',
         rid: ''
-
+        // id: ''
       },
       roleDialogFormVisible: false,
       // switch开关状态
@@ -212,11 +212,28 @@ export default {
   },
   methods: {
     // 分配角色
+    sureAllotRole () {
+      allotRole(this.roleForm.id, this.roleForm.rid)
+        .then((res) => {
+          if (res.data.meta.status === 200) {
+            this.$message.success(res.data.meta.msg)
+            this.init()
+            this.roleDialogFormVisible = false
+          } else {
+            this.$message.error(res.data.meta.msg)
+          }
+        })
+        .catch((err2) => {
+          this.$message.error(err2)
+        })
+    },
+    // 获取角色列表
     allotrole (row) {
       this.roleDialogFormVisible = true
       // 获取当前行的数据
       this.roleForm.rid = row.rid
       this.roleForm.username = row.username
+      this.roleForm.id = row.id
     },
     // 删除用户
     deleteuser (id, total) {
@@ -303,7 +320,6 @@ export default {
     init () {
       userList(this.params)
         .then(res => {
-          console.log(res)
           if (res.data.meta.status === 200) {
             this.sum = res.data.data.total
             this.userList = res.data.data.users
