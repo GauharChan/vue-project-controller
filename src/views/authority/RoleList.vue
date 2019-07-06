@@ -16,17 +16,17 @@
           <!-- 第一层权限 -->
           <el-row v-for="first in scope.row.children" :key="first.id" >
             <el-col :span="4">
-              <el-tag style="margin:10px 20px 10px 0" closable type="success">{{first.authName}}</el-tag>
+              <el-tag @close="delTag(scope.row,first.id)" style="margin:10px 20px 10px 0" closable type="success">{{first.authName}}</el-tag>
             </el-col>
             <el-col :span="20">
                 <!-- 第二层权限 -->
               <el-row v-for="second in first.children" :key="second.id" style="border-bottom: .5px dashed #ccc">
                 <el-col :span="4">
-                    <el-tag style="margin:10px 20px 10px 0" closable type="warning">{{second.authName}}</el-tag>
+                    <el-tag @close="delTag(scope.row,second.id)" style="margin:10px 20px 10px 0" closable type="warning">{{second.authName}}</el-tag>
                 </el-col>
                 <!-- 第三层权限 -->
                 <el-col :span="20">
-                    <el-tag v-for="third in second.children" :key="third.id" style="margin:10px 10px 10px 0" closable >{{third.authName}}</el-tag>
+                    <el-tag @close="delTag(scope.row,third.id)" v-for="third in second.children" :key="third.id" style="margin:10px 10px 10px 0" closable >{{third.authName}}</el-tag>
                 </el-col>
               </el-row>
             </el-col>
@@ -65,18 +65,39 @@ export default {
     }
   },
   mounted () {
-    roleList()
-      .then(res => {
-        console.log(res)
-        if (res.data.meta.status === 200) {
-          this.roleList = res.data.data
-        } else {
-          this.$message.error(res.data.meta.msg)
-        }
+    this.init()
+  },
+  methods: {
+    // 删除权限Tag标签
+    delTag (row, rightId) {
+      deleteRight(row.id, rightId)
+        .then((res) => {
+          if (res.data.meta.status === 200) {
+            this.$message.success(res.data.meta.msg)
+            row.children = res.data.data
+          } else {
+            this.$message.error(res.data.meta.msg)
+          }
+        })
+        .catch((err) => {
+          console.log(err)
       })
-      .catch(err => {
-        console.log(err)
-      })
+    },
+    // 获取角色列表
+    init () {
+      roleList()
+        .then(res => {
+          console.log(res)
+          if (res.data.meta.status === 200) {
+            this.roleList = res.data.data
+          } else {
+            this.$message.error(res.data.meta.msg)
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    }
   }
 }
 </script>
