@@ -10,8 +10,8 @@
     <!-- 表格 -->
     <el-table :data="roleList" style="width: 100%; margin-top:15px" border>
       <!-- 展开行 -->
-      <el-table-column type="expand" row-class-name='bg'>
-        <template slot-scope="scope" class="bg">
+      <el-table-column type="expand" >
+        <template slot-scope="scope" >
           <!-- 应该一个权限占一行 -->
           <!-- 第一层权限 -->
           <el-row v-for="first in scope.row.children" :key="first.id">
@@ -63,7 +63,7 @@
       <el-table-column label="操作" prop="desc">
         <template slot-scope="scope">
           <el-tooltip class="item" effect="dark" content="编辑" placement="top">
-            <el-button type="primary" plain icon="el-icon-edit"></el-button>
+            <el-button @click="editRoleById(scope.row)" type="primary" plain icon="el-icon-edit"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="分配权限" placement="top">
             <el-button @click="getTreeData(scope.row)" type="info" plain icon="el-icon-share"></el-button>
@@ -113,6 +113,21 @@
         <el-button type="primary" @click="addNew">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 添加用户dialog对话框 -->
+    <el-dialog title="编辑用户" :visible.sync="editFormVisible">
+      <el-form :model="editForm" :rules="rules" ref="roleForm">
+        <el-form-item label="角色名称" :label-width="'80px'" prop="roleName">
+          <el-input v-model="editForm.roleName" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" :label-width="'80px'">
+          <el-input @keyup.enter.native="editrole" v-model="editForm.roleDesc" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="editFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editrole">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -121,7 +136,8 @@ import {
   deleteRight,
   impower,
   addNewRole,
-  deleteRole
+  deleteRole,
+  editRole
 } from '@/api/role_api.js'
 import { authList } from '@/api/authority_api.js'
 export default {
@@ -142,7 +158,16 @@ export default {
       tempId: '',
       // 控制添加用户dialog显示隐藏
       roleFormVisible: false,
+      // 控制 添加 用户dialog显示隐藏
+      editFormVisible: false,
+      // 添加角色的数据
       roleForm: {
+        roleName: '',
+        roleDesc: ''
+      },
+      // 编辑角色的数据
+      editForm: {
+        id: '',
         roleName: '',
         roleDesc: ''
       },
@@ -158,6 +183,31 @@ export default {
     this.init()
   },
   methods: {
+    // 提交编辑
+    editrole () {
+      let id = this.editForm.id
+      let roleName = this.editForm.roleName
+      let roleDesc = this.editForm.roleDesc
+      editRole(id, roleName, roleDesc)
+        .then((res) => {
+          if (res.data.meta.status === 200) {
+            this.init()
+            this.$message.success('编辑成功')
+            this.editFormVisible = false
+          } else {
+            this.$message.error(res.data.meta.msg)
+          }
+        })
+        .catch((err1) => {
+          console.log(err1)
+        })
+    },
+    // 编辑角色
+    editRoleById (row) {
+      // 先获取当前行的数据
+      this.editForm = row
+      this.editFormVisible = true
+    },
     // 删除角色
     deleteRoleById (id) {
       this.$confirm('你确定要删除该角色吗, 是否继续?', '提示', {
@@ -194,6 +244,9 @@ export default {
                 this.init()
                 this.roleFormVisible = false
                 this.$message.success(res.data.meta.msg)
+                // 清空输入框
+                this.roleForm.roleName = ''
+                this.roleForm.roleDesc = ''
               }
             })
             .catch(err => {
@@ -304,7 +357,5 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-.bg{
-  background-color: #ccc;
-}
+
 </style>

@@ -42,3 +42,15 @@ export const deleteRole = (id) => {
     method: 'delete'
   })
 }
+
+// 编辑角色
+export const editRole = (id, roleName, roleDesc) => {
+  return axios({
+    url: `roles/${id}`,
+    method: 'put',
+    data: {
+      roleName,
+      roleDesc
+    }
+  })
+}
