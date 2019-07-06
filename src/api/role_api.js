@@ -25,3 +25,12 @@ export const impower = (roleId, rids) => {
     }
   })
 }
+
+// 添加角色
+export const addNewRole = (data) => {
+  return axios({
+    method: 'post',
+    url: 'roles',
+    data
+  })
+}

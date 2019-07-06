@@ -6,7 +6,7 @@
       <el-breadcrumb-item>权限管理</el-breadcrumb-item>
       <el-breadcrumb-item>角色列表</el-breadcrumb-item>
     </el-breadcrumb>
-    <el-button type="primary">主要按钮</el-button>
+    <el-button type="primary" plain @click="roleFormVisible = true">添加角色</el-button>
     <!-- 表格 -->
     <el-table :data="roleList" style="width: 100%; margin-top:15px" border>
       <!-- 展开行 -->
@@ -74,7 +74,7 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- dialog -->
+    <!-- 授权角色dialog -->
     <el-dialog title="授权角色" :visible.sync="dialogFormVisible">
       <!-- default-expanded-keys => 默认展开的id -->
       <!-- default-checked-keys => 默认选中的id -->
@@ -83,7 +83,7 @@
         :data="treeData"
         show-checkbox
         node-key="id"
-        :default-expand-all='true'
+        :default-expand-all="true"
         :default-checked-keys="hasChecked"
         :props="defaultProps"
       ></el-tree>
@@ -93,17 +93,32 @@
         <el-button type="primary" @click="changeImpower">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 添加用户dialog对话框 -->
+    <el-dialog title="添加用户" :visible.sync="roleFormVisible">
+      <el-form :model="roleForm" :rules="rules" ref="roleForm">
+        <el-form-item label="角色名称" :label-width="'80px'" prop="roleName">
+          <el-input v-model="roleForm.roleName" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" :label-width="'80px'">
+          <el-input v-model="roleForm.roleDesc" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="roleFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addNew">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-import { roleList, deleteRight, impower } from '@/api/role_api.js'
+import { roleList, deleteRight, impower, addNewRole } from '@/api/role_api.js'
 import { authList } from '@/api/authority_api.js'
 export default {
   data () {
     return {
       // 角色列表数据
       roleList: null,
-      // 控制dialog显示隐藏
+      // 控制授权角色dialog显示隐藏
       dialogFormVisible: false,
       treeData: null,
       // 树形组件的配置
@@ -113,13 +128,47 @@ export default {
       },
       hasChecked: [],
       // 执行分配权限的当前角色的id
-      tempId: ''
+      tempId: '',
+      // 控制添加用户dialog显示隐藏
+      roleFormVisible: false,
+      roleForm: {
+        roleName: '',
+        roleDesc: ''
+      },
+      // 验证非空
+      rules: {
+        roleName: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' }
+        ]
+      }
     }
   },
   mounted () {
     this.init()
   },
   methods: {
+    // 添加角色
+    addNew () {
+      // roleForm
+      this.$refs.roleForm.validate((vali) => {
+        if (vali) {
+          addNewRole(this.roleForm)
+            .then((res) => {
+              if (res.data.meta.status === 201) {
+                this.init()
+                this.roleFormVisible = false
+                this.$message.success(res.data.meta.msg)
+              }
+            })
+            .catch((err) => {
+              console.log(err)
+            })
+        } else {
+          this.$message.error('您的输入有误')
+          return false
+        }
+      })
+    },
     // 修改权限
     changeImpower () {
       let nodes = this.$refs.mytree.getCheckedNodes()
@@ -127,7 +176,7 @@ export default {
       // 临时数组
       let temp = []
       // 遍历获取选中的节点的id和父节点id
-      nodes.forEach((e) => {
+      nodes.forEach(e => {
         temp.push(e.id + ',' + e.pid)
       })
       // 以逗号分割为字符串，把数组里的值变成类似'1,2,3'
@@ -138,7 +187,7 @@ export default {
       let rids = [...new Set([...arr1])].join(',')
       // 传入接口需要的参数
       impower(roleId, rids)
-        .then((res) => {
+        .then(res => {
           if (res.data.meta.status === 200) {
             this.$message.success(res.data.meta.msg)
             // 刷新数据
@@ -148,7 +197,7 @@ export default {
             this.$message.error(res.data.meta.msg)
           }
         })
-        .catch((err) => {
+        .catch(err => {
           console.log(err)
         })
     },
@@ -156,7 +205,7 @@ export default {
     getTreeData (row) {
       this.tempId = row.id
       authList('tree')
-        .then((res) => {
+        .then(res => {
           if (res.data.meta.status === 200) {
             this.treeData = res.data.data
             // 每次遍历权限前，先清空存放权限id的数组
@@ -166,10 +215,10 @@ export default {
             row.children.forEach(first => {
               // 第二级
               if (first.children && first.children.length > 0) {
-                first.children.forEach((second) => {
+                first.children.forEach(second => {
                   if (second.children && second.children.length > 0) {
                     // 第三级
-                    second.children.forEach((third) => {
+                    second.children.forEach(third => {
                       // default-checked-keys 需要的是一个id数组
                       this.hasChecked.push(third.id)
                     })
@@ -182,7 +231,7 @@ export default {
             this.$message.error(res.data.meta.msg)
           }
         })
-        .catch((err1) => {
+        .catch(err1 => {
           this.$message.error(err1)
         })
     },
