@@ -14,3 +14,14 @@ export const deleteRight = (roleId, rightId) => {
     url: `roles/${roleId}/rights/${rightId}`
   })
 }
+
+// 为角色授权
+export const impower = (roleId, rids) => {
+  return axios({
+    method: 'post',
+    url: `roles/${roleId}/rights`,
+    data: {
+      rids
+    }
+  })
+}
