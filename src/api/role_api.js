@@ -34,3 +34,11 @@ export const addNewRole = (data) => {
     data
   })
 }
+
+// 删除角色
+export const deleteRole = (id) => {
+  return axios({
+    url: `roles/${id}`,
+    method: 'delete'
+  })
+}

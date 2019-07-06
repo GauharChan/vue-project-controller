@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="roleList">
     <!-- 面包屑 -->
     <el-breadcrumb separator-class="el-icon-arrow-right">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
@@ -10,8 +10,8 @@
     <!-- 表格 -->
     <el-table :data="roleList" style="width: 100%; margin-top:15px" border>
       <!-- 展开行 -->
-      <el-table-column type="expand">
-        <template slot-scope="scope">
+      <el-table-column type="expand" row-class-name='bg'>
+        <template slot-scope="scope" class="bg">
           <!-- 应该一个权限占一行 -->
           <!-- 第一层权限 -->
           <el-row v-for="first in scope.row.children" :key="first.id">
@@ -69,7 +69,12 @@
             <el-button @click="getTreeData(scope.row)" type="info" plain icon="el-icon-share"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
-            <el-button type="danger" plain icon="el-icon-delete"></el-button>
+            <el-button
+              @click="deleteRoleById(scope.row.id)"
+              type="danger"
+              plain
+              icon="el-icon-delete"
+            ></el-button>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -111,7 +116,13 @@
   </div>
 </template>
 <script>
-import { roleList, deleteRight, impower, addNewRole } from '@/api/role_api.js'
+import {
+  roleList,
+  deleteRight,
+  impower,
+  addNewRole,
+  deleteRole
+} from '@/api/role_api.js'
 import { authList } from '@/api/authority_api.js'
 export default {
   data () {
@@ -147,20 +158,45 @@ export default {
     this.init()
   },
   methods: {
+    // 删除角色
+    deleteRoleById (id) {
+      this.$confirm('你确定要删除该角色吗, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteRole(id)
+          .then(res => {
+            if (res.data.meta.status === 200) {
+              this.init()
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              })
+            }
+          })
+          .catch(err1 => {
+            this.$message({
+              type: 'error',
+              message: err1
+            })
+          })
+      })
+    },
     // 添加角色
     addNew () {
       // roleForm
-      this.$refs.roleForm.validate((vali) => {
+      this.$refs.roleForm.validate(vali => {
         if (vali) {
           addNewRole(this.roleForm)
-            .then((res) => {
+            .then(res => {
               if (res.data.meta.status === 201) {
                 this.init()
                 this.roleFormVisible = false
                 this.$message.success(res.data.meta.msg)
               }
             })
-            .catch((err) => {
+            .catch(err => {
               console.log(err)
             })
         } else {
@@ -267,5 +303,8 @@ export default {
   }
 }
 </script>
-<style>
+<style lang="less" scoped>
+.bg{
+  background-color: #ccc;
+}
 </style>
