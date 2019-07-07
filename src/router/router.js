@@ -31,17 +31,17 @@ const router = new VueRouter({
       },
       {
         name: 'User',
-        path: '/home/userList',
+        path: '/home/users',
         component: UserList
       },
       {
         name: 'AuthorityList',
-        path: '/home/authorityList',
+        path: '/home/rights',
         component: AuthorityList
       },
       {
         name: 'RoleList',
-        path: '/home/roleList',
+        path: '/home/roles',
         component: RoleList
       }
     ]

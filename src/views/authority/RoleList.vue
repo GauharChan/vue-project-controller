@@ -70,7 +70,7 @@
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
             <el-button
-              @click="deleteRoleById(scope.row.id)"
+              @click="deleteRoleById(scope.row)"
               type="danger"
               plain
               icon="el-icon-delete"
@@ -179,6 +179,11 @@ export default {
       }
     }
   },
+  computed: {
+    isAdmin (row) {
+      return true
+    }
+  },
   mounted () {
     this.init()
   },
@@ -204,18 +209,28 @@ export default {
     },
     // 编辑角色
     editRoleById (row) {
+      // 防止修改主管
+      if (row.id === 30) {
+        this.$message.warning('你现在的操作很危险，请联系管理员')
+        return
+      }
       // 先获取当前行的数据
       this.editForm = row
       this.editFormVisible = true
     },
     // 删除角色
-    deleteRoleById (id) {
+    deleteRoleById (row) {
+      // 防止修改主管
+      if (row.id === 30) {
+        this.$message.warning('你现在的操作很危险，请联系管理员')
+        return
+      }
       this.$confirm('你确定要删除该角色吗, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        deleteRole(id)
+        deleteRole(row.id)
           .then(res => {
             if (res.data.meta.status === 200) {
               this.init()
@@ -292,6 +307,11 @@ export default {
     },
     // 获取树形结构
     getTreeData (row) {
+      // 防止修改主管
+      if (row.id === 30) {
+        this.$message.warning('你现在的操作很危险，请联系管理员')
+        return
+      }
       this.tempId = row.id
       authList('tree')
         .then(res => {

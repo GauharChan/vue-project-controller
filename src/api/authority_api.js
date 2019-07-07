@@ -6,3 +6,10 @@ export const authList = (type) => {
     url: `rights/${type}`
   })
 }
+
+// 获取左边菜单栏
+export const getMenu = () => {
+  return axios({
+    url: 'menus'
+  })
+}
