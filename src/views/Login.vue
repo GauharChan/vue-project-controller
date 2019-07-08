@@ -33,7 +33,9 @@
 
 <script>
 import { login } from '@/api/user_api.js'
+import store from '@/store/store.js'
 export default {
+  store,
   data () {
     return {
       ruleForm: {
@@ -60,6 +62,8 @@ export default {
               if (res.data.meta.status === 200) {
                 // 存储token
                 localStorage.setItem('userLogin', res.data.data.token)
+                // 存用户名到store中
+                this.$store.dispatch('setUserName', res.data.data.username)
                 // 跳转
                 this.$router.push({ name: 'Home' })
               } else {

@@ -40,7 +40,11 @@
             <i class="myicon myicon-menu"></i>
           </span>
           <p class="system-title">后台管理系统</p>
-          <a class="welcome" href="javasrcipt:;" @click="exit">退出</a>
+          <div class="welcome">
+            <!-- 从store中获取登录组件传过来的变量 -->
+            <span>{{$store.getters.getUserName}}</span>
+            <a href="javasrcipt:;" @click="exit">退出</a>
+          </div>
         </el-header>
         <el-main>
           <router-view></router-view>
@@ -52,7 +56,9 @@
 
 <script>
 import { getMenu } from '@/api/authority_api.js'
+import store from '@/store/store.js'
 export default {
+  store,
   data () {
     return {
       // 左侧栏菜单数据

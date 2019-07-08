@@ -5,11 +5,13 @@ import Element from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import router from '@/router/router.js'
 import '@/styles/index.less'
+import Vuex from '@/store/store.js'
 
 Vue.use(Element, {
   size: 'small',
   zIndex: 3000
 })
+Vue.use(Vuex)
 
 Vue.config.productionTip = false
 
