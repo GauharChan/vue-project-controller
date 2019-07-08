@@ -17,7 +17,7 @@
               active-text-color="#ffd04b"
             >
             <!-- 通过请求回来的数据动态生成左侧栏菜单 -->
-              <el-submenu :index="first.id" v-for="first in menuData" :key="first.id">
+              <el-submenu :index="first.id +''" v-for="first in menuData" :key="first.id">
                 <template slot="title">
                   <i class="el-icon-location"></i>
                   <span>{{first.authName}}</span>
@@ -25,7 +25,7 @@
                 <!-- 子级菜单 -->
                 <el-menu-item :index='"/home/"+second.path' v-for="second in first.children" :key="second.id">
                   <template slot="title">
-                    <i class="el-icon-location"></i>
+                    <i class="el-icon-menu"></i>
                     <span>{{second.authName}}</span>
                   </template>
                 </el-menu-item>
