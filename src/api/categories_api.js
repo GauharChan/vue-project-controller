@@ -8,3 +8,11 @@ export const getCategoriesList = (type) => {
     }
   })
 }
+
+export const addGoods = (data) => {
+  return axios({
+    url: 'goods',
+    method: 'post',
+    data
+  })
+}

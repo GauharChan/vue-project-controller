@@ -6,6 +6,14 @@ import 'element-ui/lib/theme-chalk/index.css'
 import router from '@/router/router.js'
 import '@/styles/index.less'
 import Vuex from '@/store/store.js'
+import VueQuillEditor from 'vue-quill-editor'
+
+// require styles
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+
+Vue.use(VueQuillEditor, /* { default global options } */)
 
 Vue.use(Element, {
   size: 'small',
